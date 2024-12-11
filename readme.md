@@ -15,8 +15,6 @@ This map was developed for The Daily Beast news platform as a tool for their cli
 
 **Data Provided by:**
 - USGS Mineral Resources Data System (stones.geojson)
-- Esri ArcGIS Data and Maps: World Countries Generalized (map.geojson)
-- ESRI ArcGIS Hub Training Services: US State Boundaries (map.geojson)
 The [Esri ArcGIS Data and Maps: US State Boundaries GeoJSON](https://hub.arcgis.com/datasets/TrainingServices::us-state-boundaries/about) file was aquired after some completion of the map and reformatted to combine it with the [ESRI ArcGIS Hub Training Services: World Countries Generalized Geographic Boundaries](https://hub.arcgis.com/datasets/esri::world-countries-generalized/about) file as one GeoJSON polygon file (maps.geojson). 
 
 Map authored by Eryn Stowe
