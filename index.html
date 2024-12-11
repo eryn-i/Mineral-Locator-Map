@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mineral Locator Map</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.0/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css"> <!-- Includes the css link to Font Awesome (for icons) -->
+    <head>
+        <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
+    </head>
+    <style>
+        html, body, #map { width: 100%; height: 100%; margin: 0; background: #fff; } /* Formatting the map for full screen */
+
+        h1 { /* This is the format for the title */ 
+        position: absolute;
+        left: 50px;
+        top: 10px;
+        padding: 8px 2%;
+        margin: 0;
+        background: rgba(171, 36, 212, 0.8); /* click on the square to change the color */
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 3px;
+        color: whitesmoke;
+        font-size: 1.75em;
+        z-index: 800;
+    }
+
+    section { /* This is the format for the subheader */ 
+        position: absolute;
+        bottom: 20px;
+        left: 6px;
+        width: 350px;
+        margin: 20px auto;
+        padding: 0 15px; /* Keeps the box off the citation in the bottom right*/
+        background: rgba(171, 36, 212, 0.8); /* click on the square to change the color */
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 3px;
+        color: whitesmoke;
+        font-size: 0.75em;
+        z-index: 800;
+	}
+
+    
+    p {  /* This is the format for the paragraph */
+        font-size: 1.25em;
+        line-height: 1.5em;
+        
+	}
+        .legend {
+            line-height: 40px;
+            font-size: 16px;
+            width: 190px;
+            color: #333333;
+            padding: 6px 8px;
+            background: white;
+            background: rgba(255,255,255,0.5);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            font-family: 'Titillium Web', sans-serif;
+        }
+
+        .legend i {
+            width: 20px;
+            height: 20px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.9;
+        }
+
+        .legend img {
+            width: 16px;
+            height: 16px;
+            margin-right: 3px;
+            float: left;
+        }
+
+        .legend p {
+            font-size: 14px;
+            line-height: 20px;
+            margin: 0;
+        }
+        .content{
+            color: whitesmoke;
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 1.25em;
+            line-height: 1.5em;
+            border-radius: 3px;
+        }
+        .modal{
+            position: absolute;
+            display: block;
+            z-index: 2; /* Sit on top */
+            left: 50%;
+            top: 50%;
+            width: 50%; /* Full width */
+            height: 50%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            transform: translate(-50%, -50%);
+            
+
+        }
+        /* Modal Content/Box */
+        .modal-content {
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            margin: 20px auto;
+            padding: 0 15px; /* Keeps the box off the citation in the bottom right*/
+            background: rgba(171, 36, 212, 0.8); /* click on the square to change the color */
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 3px;
+            color: whitesmoke;
+            font-size: 0.75em;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        #map{
+            z-index:1;
+        }
+        .leaflet-control-layers-list{
+            color:black;
+            background: rgba(255, 255, 255, 0.8); /* click on the square to change the color */
+            font-size: 1.25em;
+        }
+    </style>
+
+    <script src="https://unpkg.com/leaflet@1.7.0/dist/leaflet.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script> <!-- This library asynchronously reads GeoJSON data -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script> <!-- This library colors the icons (JavaScript library to manipulate colors) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.4/chroma.min.js"></script> <!-- This colors the icons (manipulates html elements) -->
+
+    </head>
+    <!-- This is the title text --> 
+    <h1 id="title">Precious & Semi-Precious Stones across North, Central, and South America</h1> 
+
+    <div id="map"></div> 
+
+    <section>
+        <!-- This is the subheader text -->                     <!-- Should appear when zoomed out & disappear when zoomed in -->
+        <div id="subheader1">
+                <h2> Click on a Country to Locate Minerals </h2>
+                <p> The map will only snap to a country with mineral records. </p> 
+                                                                                <!-- THESE SECTIONS NEED TO BE SEPARATED 
+                                                                                 OR MAKE THEM DISAPPEAR ACCORDINGLY-->
+        </div>
+        <div id="subheader2" style="display: none">
+            <!-- This is the paragraph text -->                     <!-- Should appear when zoomed in & disappear when zoomed out -->
+            <p> The map will only snap to a country with mineral records.</p>
+                <br>
+                    <a href="" class="content" id="link1" style="display: none"></a>
+                <br>
+                    <a href="" class="content" id="link2" style="display: none"></a>
+
+                <br>
+                    <a href="" class="content" id="link3" style="display: none"></a>
+                <br>
+            
+        </div>
+
+
+    </section>
+    <body>
+    <!-- Our web map and content will go here -->
+    <div id="map"></div>
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times</span>
+            <p style="text-align: center;">
+                Welcome to the Mineral Locator Map for North, Central, and South America courtesy of <i>The Daily Beast</i>. <br>
+                Begin exploring the map by hovering over countries and US States. <br>
+                When you find an interesting section, click on it to find unique minerals near you.<br>
+                <a href="https://www.thedailybeast.com/rockhoundingthe-socially-distant-hobby-that-might-make-you-rich/" style="color: whitesmoke;">Happy Rockhounding! </a>
+                
+            </p>
+        </div>
+    </div>
+    <script>
+    // 1. Create a map object.
+    var mymap = L.map('map', {
+        center: [10, -79], //center the map between N and S America
+        zoom: 3, //this line adjusts the starting zoom level of the map
+        maxZoom: 18,//this line sets the maximum zoom level
+        minZoom: 3,//this line sets the minimum zoom level
+        detectRetina: true // detect whether the sceen is high resolution or not.
+        
+    });
+    //Prompt on page open interactions
+    var modal = document.getElementById("infoModal");
+    var span = document.getElementsByClassName("close")[0];
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+    } 
+    //Code to remove layers based on zoom level, currently not working
+    mymap.on('zoomend', function(){
+        var title = document.getElementById("title");
+        var mineralKey = document.getElementById("mineralkey");
+        var locationLegend = document.getElementById("legend");
+        var mineralLegend = document.getElementById("subheader1");
+        var mineralInfo = document.getElementById("subheader2");
+        if(mymap.getZoom() < 5){
+            title.style.display = "block";
+            locationLegend.style.display = "block";
+            mineralKey.style.display = "none";
+            mineralLegend.style.display = "block"
+            mineralInfo.style.display = "none"
+
+            for (country in CountryData){
+                if(mymap.hasLayer(CountryData[country]))
+                    mymap.removeLayer(CountryData[country])
+            }
+            if(mymap.hasLayer(stateBorders)){
+                mymap.removeLayer(stateBorders);
+            }
+        }else if(mymap.getZoom() >= 5){
+            title.style.display = "none";
+            mineralKey.style.display = "block";
+            locationLegend.style.display = "none";
+            mineralLegend.style.display = "none"
+            mineralInfo.style.display = "block"
+        }
+    })
+
+
+    // 2. Add a base map.
+    var base = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+        attribution: 'Mineral Records &copy; <a href:"https://mrdata.usgs.gov/mrds/"> USGS Mineral Resources Data System</a> | Country Polygons &copy; <a href:"https://hub.arcgis.com/datasets/esri::world-countries-generalized/about"> World Countries Generalized</a> | Base Map &copy; <a href:"https://carto.com/basemaps"> CartoDB</a> | Map Author: Eryn Stowe',
+    }).addTo(mymap);
+
+    // 2. Add a base map.
+    var Stamen_Watercolor = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    subdomains: 'abcd',
+    minZoom: 1,
+    maxZoom: 16,
+    ext: 'jpg'
+    });
+
+    var Esri_WorldStreetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+    });
+
+    var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+
+    // this is the group of basemaps, for the map control to use.
+   var baseMaps = {
+    "BaseMap":base,
+    "Stamen":Stamen_Watercolor,
+    "Esri World Street Map": Esri_WorldStreetMap,
+    "Esri World Imagery": Esri_WorldImagery,
+   }
+    
+   var stateBorders = null;
+
+    
+    var CountryOverlays = null;
+
+    // 3. Add country GeoJSON Data
+    // Null variable that will hold country data
+    var CountryData = null;
+
+    var stateData = null;
+
+    let dictionary = {};
+    // 4. build up a set of colors from colorbrewer's dark2 category (for the symbols, not map)
+    var colors = chroma.scale('Set2').mode('lch').colors(10);
+
+
+    // 5. dynamically append style classes to this page. The style classes will be used to shade the markers.
+    // We can use a for loop to do this write this css style tag.
+    for (i = 0; i < 11; i++) {
+        $('head').append($("<style> .marker-color-" + (i + 1).toString() + " { color: " + colors[i] + "; font-size: 15px; text-shadow: 0 0 3px #ffffff;} </style>"));
+    }
+    // Get GeoJSON and put it on the map when it loads
+    // Make sure you have the correct directory path below
+    $.getJSON("assets/stones.geojson")
+    .done(function(data){
+        //processData now seperates the data for each country, then adds them to a dictionary, so you can enter info.countries[United States] to get all markers in the united states.
+            var info = processData(data)
+            CountryData = {};
+            for (feature in info.countries){
+                //We do exactly that, creating a layer for each country, then adding them to another dictionary, so we can search up a map layer by country name
+                    CountryData[feature] = createPropSymbols(info.countries[feature])
+            }
+    })
+    .fail(function(){alert("There has been a problem loading the data.")});
+    
+    $.getJSON("assets/map.geojson")
+    .done(function(data){
+        //we create the region/state border layer
+        addCountyPolygons(data)
+        //we add that to the map directly, as this will always be on.
+        CountryOverlays.addTo(mymap)
+        
+    })
+     
+    //process the data to seperate points based on country.
+    // This is done using a dictionary, which is a list of key-value pairs, so the keys in this case is each country, and the values are the data points that are in that country.
+    function processData(data){
+        var countries = {};
+
+        for (var feature in data.features) {
+            var properties = data.features[feature].properties;
+
+            for(var attribute in properties){
+                if(attribute == "country"){
+                    var attr = properties[attribute];
+                    if(attr == "United States"){
+                        var state = properties["state"]
+                        if (state in countries){
+                            countries[state].push(data.features[feature]);
+                        }else{
+                            countries[state] = [data.features[feature]];
+                        }
+                        if (state in dictionary){
+                            dictionary[state] += 1;
+                        }else{
+                            dictionary[state] = 1;
+                        }
+                    }else{
+                        if (attr in countries){
+                            countries[attr].push(data.features[feature]);
+                        }else{
+                            countries[attr] = [data.features[feature]];
+                        }
+                        if (attr in dictionary){
+                            dictionary[attr] += 1;
+                        }else{
+                            dictionary[attr] = 1;
+                        }
+                    }
+                }
+                
+            }
+            
+        }
+
+        return{
+            countries: countries,
+
+        }
+    }
+
+    // create an overlay layer for regions, like countries or states
+    function addCountyPolygons(data){
+        CountryOverlays = L.geoJson(data, {
+            //sets the style of the region, color, dash 
+            style:style
+        })
+        console.log(CountryOverlays)
+        regionPopUps()
+    }
+
+    // 7. Set style function that sets fill color property equal to total gem locations in that region
+    function style(feature) {
+        return {
+            fillColor: setColor(feature.properties.NAME),
+            fillOpacity: 0.4,
+            weight: 2,
+            opacity: 1,
+            color: '#b4b4b4',
+            dashArray: '4'
+        };
+    }
+
+    // You can see we're also adding attribution information for our data sources
+    function createPropSymbols(data){
+        country = L.geoJson(data, {
+            
+            pointToLayer: function (feature, latlng){
+                var country = 0
+                switch(feature.properties.commod1){
+                    case "Diamond": 
+                        country = 1
+                        break;
+                    case "Emerald": 
+                        country = 2
+                        break;
+                    case "Garnet": 
+                        country = 3
+                        break;
+                    case "Jade": 
+                        country = 4
+                        break;
+                    case "Olivine": 
+                        country = 5
+                        break;
+                    case "Pyrite": 
+                        country = 6
+                        break;
+                    case "Quartz": 
+                        country = 7
+                        break;
+                    case "Ruby": 
+                        country = 8
+                        break;
+                    case "Sapphire": 
+                        country = 9
+                        break;
+                    default:
+                        switch(feature.properties.commod2){
+                        case "Diamond": 
+                            country = 1
+                            break;
+                        case "Emerald": 
+                            country = 2
+                            break;
+                        case "Garnet": 
+                            country = 3
+                            break;
+                        case "Jade": 
+                            country = 4
+                            break;
+                        case "Olivine": 
+                            country = 5
+                            break;
+                        case "Pyrite": 
+                            country = 6
+                            break;
+                        case "Quartz": 
+                            country = 7
+                            break;
+                        case "Ruby": 
+                            country = 8
+                            break;
+                        case "Sapphire": 
+                            country = 9
+                            break;
+                        default: 
+                            country = 10
+                            break;
+                        break;
+                    }
+                }
+                return L.marker(latlng, {
+                    icon: L.divIcon({className: 'fas fa-solid fa-gem marker-color-' + country.toString()})
+                        }).on({
+                            mouseover: function(e){
+                                this.openPopup();
+                                // This is the logic for deciding what shows in the bottom right box, the wikipedia links.
+                                //this grabs all the gesm at a marker's site
+                                var gems = feature.properties.commod1.split(',');
+                                gems.push(...feature.properties.commod2.split(','));
+                                gems.push(...feature.properties.commod3.split(','));
+                                //some of the commod categories are empty, so we need to remove the empty strings that are accidentally added.
+                                // fortunately, empty strings return false when you put them as a conditional, if("") == false, if("yo") == true, every time.
+                                gems = gems.filter(n => n)
+                                console.log(gems)
+                                var link1 = document.getElementById("link1");
+                                var link1Header = document.getElementById("link1.Header");
+                                var link1Content = document.getElementById("link1.Content");
+                                var link2 = document.getElementById("link2");
+                                var link2Header = document.getElementById("link2.Header");
+                                var link2Content = document.getElementById("link2.Content");
+                                var link3 = document.getElementById("link3");
+                                var link3Header = document.getElementById("link3.Header");
+                                var link3Content = document.getElementById("link3.Content");
+
+                                switch(gems.length){
+                                    case 0:
+                                        link1.style.display = "none";
+                                        link2.style.display= "none";
+                                        link3.style.display = "none";                                        link3.style.display= "none";
+                                    break;
+                                    case 1:
+                                        link1.style.display = "block";
+                                        link1.innerHTML = gems[0];
+                                        link1.cloneNode(true)
+                                        link1.setAttribute('href', "https://en.wikipedia.org/wiki/" + gems[0].trim());
+                                        link2.style.display = "none";
+                                        link3.style.display = "none";
+                                    break;
+                                    case 2:
+                                    link1.style.display = "block";
+                                        link1.innerHTML = gems[0];
+                                        link1.cloneNode(true)
+                                        link1.setAttribute('href', "https://en.wikipedia.org/wiki/" + gems[0].trim());
+                                    link2.style.display = "block";
+                                        link2.innerHTML = gems[1];
+                                        link2.cloneNode(true)
+                                        link2.setAttribute('href', "https://en.wikipedia.org/wiki/" + gems[1].trim());
+                                    link3.style.display = "none";
+                                    break;
+                                    default:
+                                    link1.style.display = "block";
+                                        link1.innerHTML = gems[0];
+                                        link1.cloneNode(true)
+                                        link1.setAttribute('href', "https://en.wikipedia.org/wiki/" + gems[0].trim());
+                                    link2.style.display = "block";
+                                        link2.innerHTML = gems[1];
+                                        link2.cloneNode(true)
+                                        link2.setAttribute('href', "https://en.wikipedia.org/wiki/" + gems[1].trim());
+                                    link3.style.display = "block";
+                                        link3.innerHTML = gems[2];
+                                        link3.cloneNode(true)
+                                        link3.setAttribute('href', "https://en.wikipedia.org/wiki/" + gems[2].trim());
+                                    break;
+                                }
+                            },
+                            mouseout: function(e){
+                                this.closePopup();
+                                
+                            }
+                        });
+            },
+        });
+        updatePropSymbols(data);
+        return country
+    }
+
+     
+    function updatePropSymbols(info){
+        country.eachLayer(function(layer){
+            var props = layer.feature.properties;
+            var popUpContent = "<b>" + props.commod1 +
+                "</b><br>" + "<i>" + props.site_name + "</i><br>" +
+                "<i>" + props.state + "</i><br>" +
+                "<i>" + props.country + "<i>";
+            layer.bindPopup(popUpContent, {offset: new L.point(0,0)});
+        });
+    }
+
+    function regionPopUps(){
+        CountryOverlays.eachLayer(function(layer){
+            var props = layer.feature.properties;
+            if(props.NAME){
+                var popUpContent = "<b>" + props.NAME + "</b>";
+            }else{
+                var popUpContent = "<b>" + props.COUNTRY + "</b>";
+            }
+            
+            layer.on({
+            mouseover: function(e){
+                this.openPopup();
+            },
+            mouseout: function(e){
+                this.closePopup();
+            },
+            click: function(e){
+                var country = layer.feature.properties.NAME;
+                if(country in CountryData){
+                CountryData[country].addTo(mymap)
+                }
+                mymap.flyTo(layer.getCenter(), 7)
+            },
+        })
+            layer.bindPopup(popUpContent, {offset: new L.point(0,0)});
+        });
+    }
+
+    // 6. Set function for color ramp
+    colors = chroma.scale('Purples').colors(5); //we'll use 5 classes (for the map, not symbols)
+
+    // this function manually defines your choropleth classification system
+    //so you'll need to figure out which break points you'd like to use
+    //based on the data distribution
+    //this equal interval classification with 5 classes, takes the range of the
+    //data (133) and divides it by 5, to show there are intervals of 27 per class
+    //so...
+    function setColor(zipcode) {
+        var id = 0;
+        var density = dictionary[zipcode]
+        if (density > 11) { id = 3; } //highest 4th class
+        else if (density > 5 && density <= 10) { id = 2; } //3rdclass
+        else if (density > 0 &&  density <= 5) { id = 1; } //2ndclass
+        else  { id = 0; }
+        return colors[id];
+    }
+
+    
+
+    
+   
+    
+    // 9. Create Leaflet Control Object for Legend
+    var legend = L.control({position: 'topright'});
+
+    // 10. Function that runs when legend is added to map
+    legend.onAdd = function () {
+
+        // Create Div Element and Populate it with HTML
+        var div = L.DomUtil.create('div', 'legend');
+        //Seperate the elements that will have different behaviors.
+        //The legend element is for the mieral density legend, we apend it to div so the div control contains it
+        var legend = L.DomUtil.create('div');
+        div.appendChild(legend);
+        legend.id = "legend"
+        
+        //this line creates a title for the choropleth part of the legend
+        legend.innerHTML += '<b>Locations per Country</b><br />';
+        //the colors specify the shade of purple that we used to do the polygon shading
+        legend.innerHTML += '<i style="background: ' + colors[4] + '; opacity: 0.5"></i><p>50+ Minerals Locations</p>'; //This is not showing, fix it
+        legend.innerHTML += '<i style="background: ' + colors[3] + '; opacity: 0.5"></i><p>35-49 Minerals Locations</p>';
+        legend.innerHTML += '<i style="background: ' + colors[2] + '; opacity: 0.5"></i><p>20-34 Minerals Locations</p>';
+        legend.innerHTML += '<i style="background: ' + colors[1] + '; opacity: 0.5"></i><p>1-19 Minerals Locations</p>';
+        legend.innerHTML += '<i style="background: ' + colors[0] + '; opacity: 0.5"></i><p> 0 Mineral Locations</p>';
+        // The other half of the legend, so we give it its own HTMLElement
+        var mineralKey = L.DomUtil.create('div');
+        div.appendChild(mineralKey)
+        mineralKey.id = "mineralkey"
+        mineralKey.style.display = "none";
+        //this line provides the legend title for the symbols
+        mineralKey.innerHTML += '<b>Type of Mineral Key<b><br />';
+        //the next 3 lines call the icon along with its proper color
+        //notice the names of the gems listed within the <p> tags at the end of the lines
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-1"></i><p>Diamond</p>';
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-2"></i><p>Emerald</p>';
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-3"></i><p>Garnet</p>';
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-4"></i><p>Jade</p>';
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-5"></i><p>Olivine</p>';
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-6"></i><p>Pyrite</p>';
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-7"></i><p>Quartz</p>';
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-8"></i><p>Ruby</p>';
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-9"></i><p>Sapphire</p>';
+        mineralKey.innerHTML += '<i class="fas fa-solid fa-gem marker-color-10"></i><p>Multiple Minerals</p>';
+        // Return the Legend div containing the HTML content
+        return div;
+    };
+
+    // 11. Add a legend to map
+    legend.addTo(mymap);
+
+    // 12. Add a scale bar to map
+    L.control.scale({position: 'bottomleft'}).addTo(mymap);
+
+   //Add a control that allows you to switch between base layers, for funsies
+   var control = L.control.layers(baseMaps);  
+   control.id = 'mapControl'
+   control.addTo(mymap)
+
+</script>
+</body>
+</html>
